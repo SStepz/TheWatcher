@@ -1,4 +1,5 @@
 *.csv
+*.xlsx
 *.html
 *.png
 *.joblib
