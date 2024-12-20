@@ -19,18 +19,18 @@ df_anime_score = df_anime_score[df_anime_score['username'].notnull()]
 
 # Movie Data
 df_movie = pd.read_csv('../Dataset/Movie/movie.csv')
+df_movie = df_movie.drop(columns=['status', 'release_date', 'revenue', 'runtime', 'adult', 'backdrop_path', 'budget', 'homepage', 'imdb_id', 'original_language', 'original_title', 'overview', 'poster_path', 'tagline', 'production_companies', 'production_countries', 'spoken_languages'])
 df_movie_score = pd.read_excel('../Dataset/Movie/movie_user_ratings.xlsx')
 df_movie_score['userId'] = df_movie_score['userId'].astype('str')
-# movie_svd_model = load('../Model/movie_svd_model.joblib')
+movie_svd_model = load('../Model/movie_svd_model.joblib')
 
-df_movie = df_movie.drop(columns=['status', 'release_date', 'revenue', 'runtime', 'adult', 'backdrop_path', 'budget', 'homepage', 'imdb_id', 'original_language', 'original_title', 'overview', 'poster_path', 'tagline', 'production_companies', 'production_countries', 'spoken_languages'])
 df_movie = df_movie[df_movie['vote_average'] != 0]
 df_movie_score = df_movie_score[df_movie_score['userId'].notnull()]
 
 # TV Data
 df_tv = pd.read_csv('../Dataset/TV/tv.csv')
+df_tv = df_tv.drop(columns=['original_language', 'overview', 'adult', 'backdrop_path', 'first_air_date', 'last_air_date', 'homepage', 'original_name', 'poster_path', 'status', 'tagline', 'created_by', 'languages', 'networks', 'origin_country', 'spoken_languages', 'production_companies', 'production_countries', 'episode_run_time'])
 # df_tv_score = pd.read_excel('../Dataset/TV/tv_user_ratings.xlsx')
 # tv_svd_model = load('../Model/tv_svd_model.joblib')
 
-df_tv = df_tv.drop(columns=['original_language', 'overview', 'adult', 'backdrop_path', 'first_air_date', 'last_air_date', 'homepage', 'original_name', 'poster_path', 'status', 'tagline', 'created_by', 'languages', 'networks', 'origin_country', 'spoken_languages', 'production_companies', 'production_countries', 'episode_run_time'])
 df_tv = df_tv[df_tv['vote_average'] != 0]

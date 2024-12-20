@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
-from data import df_anime, df_anime_score, anime_svd_model, df_movie, df_movie_score, df_tv
+from data import df_anime, df_anime_score, anime_svd_model, df_movie, df_movie_score, movie_svd_model, df_tv
 import faiss
 from database import fetch_real_time_data
 from anime_functions import *
@@ -36,6 +36,7 @@ class ContentRequest(BaseModel):
 
 class UserRequest(BaseModel):
     userId: str
+    number: int
 
 @app.post("/anime/recommendations/content", tags=['Anime'])
 def get_content_based_anime_recommendations(request: ContentRequest):
@@ -53,10 +54,11 @@ def get_content_based_anime_recommendations(request: ContentRequest):
 @app.post("/anime/recommendations/user", tags=['Anime'])
 def get_hybrid_user_based_anime_recommendations(request: UserRequest):
     user_id = request.userId
+    n = request.number
     df_real_time = fetch_real_time_data('anime')
     user_anime_matrix, user_anime_sparse_matrix = get_user_item_anime_matrix(df_anime_score, df_real_time)
     knn = get_anime_knn_model(user_anime_sparse_matrix)
-    recommended_animes_ids = hybrid_anime_recommendations(user_id, anime_svd_model, knn, user_anime_matrix, user_anime_sparse_matrix)
+    recommended_animes_ids = hybrid_anime_recommendations(user_id, anime_svd_model, knn, user_anime_matrix, user_anime_sparse_matrix, n)
     recommendations = get_anime_details_by_ids(recommended_animes_ids)
     return recommendations.to_dict(orient='records')
 
@@ -78,7 +80,14 @@ def get_content_based_movie_recommendations(request: ContentRequest):
 
 @app.post("/movie/recommendations/user", tags=['Movie'])
 def get_hybrid_user_based_movie_recommendations(request: UserRequest):
-    return {"message": "User-based movie recommendations not available yet."}
+    user_id = request.userId
+    n = request.number
+    df_real_time = fetch_real_time_data('movie')
+    user_movie_matrix, user_movie_sparse_matrix = get_user_item_movie_matrix(df_movie_score, df_real_time)
+    knn = get_movie_knn_model(user_movie_sparse_matrix)
+    recommended_movies_ids = hybrid_movie_recommendations(user_id, movie_svd_model, knn, user_movie_matrix, user_movie_sparse_matrix, n)
+    recommendations = get_movie_details_by_ids(recommended_movies_ids)
+    return recommendations.to_dict(orient='records')
 
 @app.post("/tv/recommendations/content", tags=['TV Series'])
 def get_content_based_tv_recommendations(request: ContentRequest):
