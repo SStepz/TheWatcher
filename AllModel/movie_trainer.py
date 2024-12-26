@@ -27,4 +27,4 @@ cross_validate(svd_model, data, measures=['RMSE', 'MAE'], cv=5, verbose=True)
 svd_trainset = data.build_full_trainset()
 svd_model.fit(svd_trainset)
 
-dump(svd_model, '../Model/movie_svd_model.joblib')
+dump(svd_model, './API/Model/movie_svd_model.joblib')

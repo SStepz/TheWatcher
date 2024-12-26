@@ -2,10 +2,10 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
-from data import df_anime, df_anime_score, anime_svd_model, df_movie, df_movie_score, movie_svd_model, df_tv
+from .data import df_anime, df_anime_score, anime_svd_model, df_movie, df_movie_score, movie_svd_model, df_tv
 import faiss
-from database import fetch_real_time_data
-from anime_functions import *
+from .database import fetch_real_time_data
+from .anime_functions import *
 
 # Content-based anime recommendations
 anime_tfidf = TfidfVectorizer(stop_words='english')

@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 from scipy.sparse import csr_matrix
 from sklearn.neighbors import NearestNeighbors
-from data import df_anime, df_movie
+from .data import df_anime, df_movie
 
 # Function to compute cosine similarity for a single anime
 def compute_cosine_similarity_for_anime(matrix, idx):
