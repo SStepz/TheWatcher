@@ -1,9 +1,9 @@
 from pymongo import MongoClient
-from decouple import config
+import os
 import pandas as pd
 
-mongouser = config("MONGO_USERNAME")
-mongopass = config("MONGO_PASSWORD")
+mongouser = os.getenv("MONGO_USERNAME")
+mongopass = os.getenv("MONGO_PASSWORD")
 
 def fetch_real_time_data(data_type):
     # Connect to the MongoDB database

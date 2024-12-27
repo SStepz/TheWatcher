@@ -14,7 +14,7 @@ Complete code (including a trained model) to deploy and inference a machine lear
 
 3. Run container
 
-    $ docker run --name container_name -p 8000:8000 image_name
+    $ docker run --name container_name -p 8000:8000 -e MONGO_USERNAME="your_username" -e MONGO_PASSWORD="your_password" image_name
 
 ---
 
