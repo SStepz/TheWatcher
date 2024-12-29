@@ -6,6 +6,7 @@ from app.data import df_anime, df_anime_score, anime_svd_model, df_movie, df_mov
 import faiss
 from app.database import fetch_real_time_data
 from app.anime_functions import *
+from app.movie_functions import *
 
 # Content-based anime recommendations
 anime_tfidf = TfidfVectorizer(stop_words='english')
