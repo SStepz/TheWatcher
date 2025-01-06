@@ -31,7 +31,8 @@ def get_anime_knn_model(user_anime_sparse_matrix):
 
 def get_anime_recommendations_by_user(user_id, knn, user_anime_matrix, user_anime_sparse_matrix, n):
     user_index = user_anime_matrix.index.get_loc(user_id)
-    distances, indices = knn.kneighbors(user_anime_sparse_matrix[user_index], n_neighbors=n+1)
+    n_neighbors = min(n + 1, user_anime_sparse_matrix.shape[0])  # Ensure n_neighbors is not greater than the number of samples
+    distances, indices = knn.kneighbors(user_anime_sparse_matrix[user_index], n_neighbors=n_neighbors)
     
     # Get the indices of the most similar users
     similar_users_indices = indices.flatten()[1:]  # Exclude the user itself
@@ -98,12 +99,12 @@ def hybrid_anime_recommendations(user_id, svd, knn, user_anime_matrix, user_anim
         user_based_recommendations = [(anime_id, (score - min_user_score) / (max_user_score - min_user_score), score) for anime_id, score in user_based_recommendations]
     
     # Combine both sets of recommendations and remove duplicates
-    combined_recommendations = list(set(top_svd_recommendations + user_based_recommendations))
+    combined_recommendations = list({animeId: (score, original_score) for animeId, score, original_score in top_svd_recommendations + user_based_recommendations}.items())
 
-    # Sort by recommendation score and then by anime score
-    combined_recommendations = sorted(combined_recommendations, key=lambda x: (x[1], x[2]), reverse=True)
+    # Sort by recommendation score and then by tv score
+    combined_recommendations = sorted(combined_recommendations, key=lambda x: (x[1][0], x[1][1]), reverse=True)
 
-    final_recommendations = [anime_id for anime_id, _, _ in combined_recommendations[:n]]
+    final_recommendations = [anime_id for anime_id, _ in combined_recommendations[:n]]
     return final_recommendations
 
 def get_anime_details_by_ids(anime_ids):
@@ -112,4 +113,4 @@ def get_anime_details_by_ids(anime_ids):
         anime = df_anime[df_anime['id'] == anime_id]
         animes.append(anime)
     result = pd.concat(animes)
-    return result[['id','title', 'genres', 'score']]
+    return result[['id', 'title', 'genres', 'score', 'image_url']]

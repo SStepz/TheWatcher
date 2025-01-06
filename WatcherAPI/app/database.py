@@ -26,6 +26,10 @@ def fetch_real_time_data(data_type):
         df_real_time['tmdbId'] = df_real_time['tmdbId'].astype('int64')
     elif data_type == 'tv':
         cursor = collection.find({'mediaType': 'serie', 'point': {'$gte': 1}}, {'_id': 0, 'userId': 1, 'mediaId': 1, 'point': 1})
+        df_real_time = pd.DataFrame(list(cursor))
+        df_real_time.rename(columns={'userId': 'userId', 'mediaId': 'tmdbId', 'point': 'rating'}, inplace=True)
+        df_real_time['userId'] = df_real_time['userId'].astype('str')
+        df_real_time['tmdbId'] = df_real_time['tmdbId'].astype('int64')
     
     # Close the connection
     client.close()

@@ -8,7 +8,11 @@ Complete code (including a trained model) to deploy and inference a machine lear
 
 2. Build docker image
 
-    $ docker build -t image_name .
+    #. Normal
+        $ docker build -t image_name .
+
+    #. For Multi-Architecture
+        $ docker buildx build --push -t sstepz/watcher-rec:v1 --platform linux/amd64,linux/arm64 .
 
 ---
 

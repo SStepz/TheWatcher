@@ -1,5 +1,4 @@
 import pandas as pd
-from sklearn.metrics.pairwise import cosine_similarity
 from scipy.sparse import csr_matrix
 from sklearn.neighbors import NearestNeighbors
 from app.data import df_movie
@@ -25,7 +24,8 @@ def get_movie_knn_model(user_movie_sparse_matrix):
 
 def get_movie_recommendations_by_user(user_id, knn, user_movie_matrix, user_movie_sparse_matrix, n):
     user_index = user_movie_matrix.index.get_loc(user_id)
-    distances, indices = knn.kneighbors(user_movie_sparse_matrix[user_index], n_neighbors=n+1)
+    n_neighbors = min(n + 1, user_movie_sparse_matrix.shape[0])  # Ensure n_neighbors is not greater than the number of samples
+    distances, indices = knn.kneighbors(user_movie_sparse_matrix[user_index], n_neighbors=n_neighbors)
     
     # Get the indices of the most similar users
     similar_users_indices = indices.flatten()[1:]  # Exclude the user itself
@@ -92,12 +92,12 @@ def hybrid_movie_recommendations(user_id, svd, knn, user_movie_matrix, user_movi
         user_based_recommendations = [(tmdbId, (score - min_user_score) / (max_user_score - min_user_score), score) for tmdbId, score in user_based_recommendations]
 
     # Combine both sets of recommendations and remove duplicates
-    combined_recommendations = list(set(top_svd_recommendations + user_based_recommendations))
+    combined_recommendations = list({tmdbId: (score, original_score) for tmdbId, score, original_score in top_svd_recommendations + user_based_recommendations}.items())
 
-    # Sort by recommendation score and then by movie score
-    combined_recommendations = sorted(combined_recommendations, key=lambda x: (x[1], x[2]), reverse=True)
+    # Sort by recommendation score and then by tv score
+    combined_recommendations = sorted(combined_recommendations, key=lambda x: (x[1][0], x[1][1]), reverse=True)
     
-    final_recommendations = [tmdbId for tmdbId, _, _ in combined_recommendations[:n]]
+    final_recommendations = [tmdbId for tmdbId, _ in combined_recommendations[:n]]
     return final_recommendations
 
 def get_movie_details_by_ids(movie_ids):
@@ -106,4 +106,4 @@ def get_movie_details_by_ids(movie_ids):
         movie = df_movie[df_movie['id'] == movie_id]
         movies.append(movie)
     result = pd.concat(movies)
-    return result[['id','title', 'genres', 'vote_average']]
+    return result[['id', 'title', 'genres', 'vote_average', 'release_date', 'poster_path']]
