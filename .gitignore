@@ -1,6 +1,7 @@
 AllData/
 AllModel/*.joblib
-Dataset/
+*.csv
+*.xlsx
 
 # Created by https://www.toptal.com/developers/gitignore/api/flask,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=flask,python

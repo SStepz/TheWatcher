@@ -18,27 +18,27 @@ Complete code (including a trained model) to deploy and inference a machine lear
 
 3. Run container
 
-    $ docker run --name container_name -p 8000:8000 -e MONGO_USERNAME="your_username" -e MONGO_PASSWORD="your_password" image_name
+    $ docker run --name container_name -p 80:80 -e MONGO_USERNAME="" -e MONGO_PASSWORD="" sstepz/watcher-rec:v1
 
 ---
 
 4. Output will contain
 
-    INFO: Uvicorn running on http://0.0.0.0:8000
+    INFO: Uvicorn running on http://0.0.0.0:80
 
     Use this url in chrome to see the model frontend;
-    use http://0.0.0.0:8000/docs for testing the model in the web interface.
+    use http://0.0.0.0:80/docs for testing the model in the web interface.
 
 ---
 
 5. Query model
 
     #. Via web interface (chrome):
-        http://0.0.0.0:8000/docs -> test model
+        http://0.0.0.0:80/docs -> test model
 
     #. Via python client:
         client.py
 
     #. Via curl request:
 
-        $ curl -X POST "http://0.0.0.0:8000/predict" -H "accept: application/json" -H "Content-Type: application/json" -d '{"features": [5.1, 3.5, 1.4, 0.2]}'
+        $ curl -X POST "http://0.0.0.0:80/predict" -H "accept: application/json" -H "Content-Type: application/json" -d '{"features": [5.1, 3.5, 1.4, 0.2]}'
