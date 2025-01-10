@@ -1,6 +1,5 @@
 import requests
 import pandas as pd
-from openpyxl import load_workbook
 import os
 
 BASE_URL = 'https://api.themoviedb.org/3'
@@ -20,7 +19,10 @@ def get_tv_user_ratings(tv_ids):
     for tv_id in tv_ids:
         page = 1
         while True:
-            data = fetch_tv_user_ratings(tv_id, page)
+            try:
+                data = fetch_tv_user_ratings(tv_id, page)
+            except requests.HTTPError:
+                break
             if not data['results']:
                 break
             for review in data['results']:
@@ -40,13 +42,12 @@ tv_ids = [93405, 215866, 236429, 125988, 125988, 219543, 112581, 94605, 244243, 
 # Load the CSV dataset
 df = pd.read_csv('../AllData/TV/tv.csv')
 
-# Filter TV IDs by vote_count > 0
+# Filter TV IDs by vote_count > 4
 filtered_df = df[df['vote_count'] > 4]
 filtered_tv_ids = filtered_df['id'].unique()
-test_ids = filtered_tv_ids[:100]
 
 # Fetch user ratings
-user_ratings = get_tv_user_ratings(test_ids)
+user_ratings = get_tv_user_ratings(filtered_tv_ids)
 
 # Convert to DataFrame
 df = pd.DataFrame(user_ratings)

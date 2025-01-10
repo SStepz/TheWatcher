@@ -5,8 +5,8 @@ from surprise.model_selection import cross_validate
 from joblib import dump
 
 # Anime Data
-df_anime = pd.read_csv('../Dataset/Anime/anime.csv')
-df_anime_score = pd.read_excel('../Dataset/Anime/users-scores.xlsx')
+df_anime = pd.read_csv('../WatcherAPI/app/Dataset/Anime/anime.csv')
+df_anime_score = pd.read_excel('../WatcherAPI/app/Dataset/Anime/anime_user_ratings.xlsx')
 df_anime_score['user_id'] = df_anime_score['user_id'].astype('str')
 
 anime_scores = df_anime['score'][df_anime['score'] != -1]
@@ -32,4 +32,4 @@ cross_validate(svd_model, data, measures=['RMSE', 'MAE'], cv=5, verbose=True)
 svd_trainset = data.build_full_trainset()
 svd_model.fit(svd_trainset)
 
-dump(svd_model, './API/Model/anime_svd_model.joblib')
+dump(svd_model, '../WatcherAPI/app/Model/anime_svd_model.joblib')

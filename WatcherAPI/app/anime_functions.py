@@ -16,6 +16,11 @@ def get_user_item_anime_matrix(df_anime_score, df_real_time):
     
     # Create a pivot table with users as rows and animes as columns
     user_anime_matrix = df_combined.pivot(index='user_id', columns='anime_id', values='rating').fillna(0)
+    user_click_matrix = df_combined.pivot(index='user_id', columns='anime_id', values='clickCount').fillna(0)
+    user_favorite_matrix = df_combined.pivot(index='user_id', columns='anime_id', values='favoriteAt').fillna(0)
+
+    # Combine matrices
+    user_anime_matrix = user_anime_matrix + user_click_matrix * 0.1 + user_favorite_matrix * 0.5
     
     # Convert to sparse matrix
     user_anime_sparse_matrix = csr_matrix(user_anime_matrix.values)
@@ -79,7 +84,10 @@ def hybrid_anime_recommendations(user_id, svd, knn, user_anime_matrix, user_anim
         if svd_recommendations:
             max_svd_score = max(svd_recommendations, key=lambda x: x[1])[1]
             min_svd_score = min(svd_recommendations, key=lambda x: x[1])[1]
-            svd_recommendations = [(anime_id, (score - min_svd_score) / (max_svd_score - min_svd_score), score) for anime_id, score in svd_recommendations]
+            if max_svd_score != min_svd_score:
+                svd_recommendations = [(anime_id, (score - min_svd_score) / (max_svd_score - min_svd_score), score) for anime_id, score in svd_recommendations]
+            else:
+                svd_recommendations = [(anime_id, 0, score) for anime_id, score in svd_recommendations]
         
         # Sort the SVD recommendations
         svd_recommendations = sorted(svd_recommendations, key=lambda x: x[1], reverse=True)
@@ -96,7 +104,10 @@ def hybrid_anime_recommendations(user_id, svd, knn, user_anime_matrix, user_anim
     if user_based_recommendations:
         max_user_score = max(user_based_recommendations, key=lambda x: x[1])[1]
         min_user_score = min(user_based_recommendations, key=lambda x: x[1])[1]
-        user_based_recommendations = [(anime_id, (score - min_user_score) / (max_user_score - min_user_score), score) for anime_id, score in user_based_recommendations]
+        if max_user_score != min_user_score:
+            user_based_recommendations = [(anime_id, (score - min_user_score) / (max_user_score - min_user_score), score) for anime_id, score in user_based_recommendations]
+        else:
+            user_based_recommendations = [(anime_id, 0, score) for anime_id, score in user_based_recommendations]
     
     # Combine both sets of recommendations and remove duplicates
     combined_recommendations = list({animeId: (score, original_score) for animeId, score, original_score in top_svd_recommendations + user_based_recommendations}.items())

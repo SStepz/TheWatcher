@@ -13,23 +13,29 @@ def fetch_real_time_data(data_type):
 
     # Fetch the latest user ratings
     if data_type == 'anime':
-        cursor = collection.find({'mediaType': 'anime', 'point': {'$gte': 1}}, {'_id': 0, 'userId': 1, 'mediaId': 1, 'point': 1})
+        cursor = collection.find({'mediaType': 'anime', 'point': {'$gte': 1}}, {'_id': 0, 'userId': 1, 'mediaId': 1, 'point': 1, 'clickCount': 1, 'favoriteAt': 1})
         df_real_time = pd.DataFrame(list(cursor))
         df_real_time.rename(columns={'userId': 'user_id', 'mediaId': 'anime_id', 'point': 'rating'}, inplace=True)
         df_real_time['user_id'] = df_real_time['user_id'].astype('str')
         df_real_time['anime_id'] = df_real_time['anime_id'].astype('int64')
+        df_real_time['clickCount'] = df_real_time['clickCount'].fillna(0).astype('int64')
+        df_real_time['favoriteAt'] = df_real_time['favoriteAt'].notnull().astype('int64')
     elif data_type == 'movie':
-        cursor = collection.find({'mediaType': 'movie', 'point': {'$gte': 1}}, {'_id': 0, 'userId': 1, 'mediaId': 1, 'point': 1})
+        cursor = collection.find({'mediaType': 'movie', 'point': {'$gte': 1}}, {'_id': 0, 'userId': 1, 'mediaId': 1, 'point': 1, 'clickCount': 1, 'favoriteAt': 1})
         df_real_time = pd.DataFrame(list(cursor))
         df_real_time.rename(columns={'userId': 'userId', 'mediaId': 'tmdbId', 'point': 'rating'}, inplace=True)
         df_real_time['userId'] = df_real_time['userId'].astype('str')
         df_real_time['tmdbId'] = df_real_time['tmdbId'].astype('int64')
+        df_real_time['clickCount'] = df_real_time['clickCount'].fillna(0).astype('int64')
+        df_real_time['favoriteAt'] = df_real_time['favoriteAt'].notnull().astype('int64')
     elif data_type == 'tv':
-        cursor = collection.find({'mediaType': 'serie', 'point': {'$gte': 1}}, {'_id': 0, 'userId': 1, 'mediaId': 1, 'point': 1})
+        cursor = collection.find({'mediaType': 'serie', 'point': {'$gte': 1}}, {'_id': 0, 'userId': 1, 'mediaId': 1, 'point': 1, 'clickCount': 1, 'favoriteAt': 1})
         df_real_time = pd.DataFrame(list(cursor))
         df_real_time.rename(columns={'userId': 'userId', 'mediaId': 'tmdbId', 'point': 'rating'}, inplace=True)
         df_real_time['userId'] = df_real_time['userId'].astype('str')
         df_real_time['tmdbId'] = df_real_time['tmdbId'].astype('int64')
+        df_real_time['clickCount'] = df_real_time['clickCount'].fillna(0).astype('int64')
+        df_real_time['favoriteAt'] = df_real_time['favoriteAt'].notnull().astype('int64')
     
     # Close the connection
     client.close()

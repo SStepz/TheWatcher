@@ -9,6 +9,11 @@ def get_user_item_tv_matrix(df_tv_score, df_real_time):
     
     # Create a pivot table with users as rows and tvs as columns
     user_tv_matrix = df_combined.pivot(index='userId', columns='tmdbId', values='rating').fillna(0)
+    user_click_matrix = df_combined.pivot(index='userId', columns='tmdbId', values='clickCount').fillna(0)
+    user_favorite_matrix = df_combined.pivot(index='userId', columns='tmdbId', values='favoriteAt').fillna(0)
+
+    # Combine matrices
+    user_tv_matrix = user_tv_matrix + user_click_matrix * 0.1 + user_favorite_matrix * 0.5
     
     # Convert to sparse matrix
     user_tv_sparse_matrix = csr_matrix(user_tv_matrix.values)
@@ -72,7 +77,10 @@ def hybrid_tv_recommendations(user_id, svd, knn, user_tv_matrix, user_tv_sparse_
         if svd_recommendations:
             max_svd_score = max(svd_recommendations, key=lambda x: x[1])[1]
             min_svd_score = min(svd_recommendations, key=lambda x: x[1])[1]
-            svd_recommendations = [(tmdbId, (score - min_svd_score) / (max_svd_score - min_svd_score), score) for tmdbId, score in svd_recommendations]
+            if max_svd_score != min_svd_score:
+                svd_recommendations = [(tmdbId, (score - min_svd_score) / (max_svd_score - min_svd_score), score) for tmdbId, score in svd_recommendations]
+            else:
+                svd_recommendations = [(tmdbId, 0, score) for tmdbId, score in svd_recommendations]
         
         # Sort the SVD recommendations
         svd_recommendations = sorted(svd_recommendations, key=lambda x: x[1], reverse=True)
@@ -89,7 +97,10 @@ def hybrid_tv_recommendations(user_id, svd, knn, user_tv_matrix, user_tv_sparse_
     if user_based_recommendations:
         max_user_score = max(user_based_recommendations, key=lambda x: x[1])[1]
         min_user_score = min(user_based_recommendations, key=lambda x: x[1])[1]
-        user_based_recommendations = [(tmdbId, (score - min_user_score) / (max_user_score - min_user_score), score) for tmdbId, score in user_based_recommendations]
+        if max_user_score != min_user_score:
+            user_based_recommendations = [(tmdbId, (score - min_user_score) / (max_user_score - min_user_score), score) for tmdbId, score in user_based_recommendations]
+        else:
+            user_based_recommendations = [(tmdbId, 0, score) for tmdbId, score in user_based_recommendations]
 
     # Combine both sets of recommendations and remove duplicates
     combined_recommendations = list({tmdbId: (score, original_score) for tmdbId, score, original_score in top_svd_recommendations + user_based_recommendations}.items())
