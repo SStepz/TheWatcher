@@ -1,14 +1,7 @@
 import pandas as pd
-from sklearn.metrics.pairwise import cosine_similarity
 from scipy.sparse import csr_matrix
 from sklearn.neighbors import NearestNeighbors
 from app.data import df_anime
-
-# Function to compute cosine similarity for a single anime
-def compute_cosine_similarity_for_anime(matrix, idx):
-    anime_vector = matrix[idx]
-    similarity_scores = cosine_similarity(anime_vector, matrix).flatten()
-    return similarity_scores
 
 def get_user_item_anime_matrix(df_anime_score, df_real_time):
     # Combine the existing data with the real-time data

@@ -12,8 +12,11 @@ from app.tv_functions import *
 
 # Content-based anime recommendations
 anime_tfidf = TfidfVectorizer(stop_words='english')
-anime_tfidf_matrix = anime_tfidf.fit_transform((genre for genre in df_anime['genres'].values.astype('U')))
-anime_tfidf_matrix_sparse = csr_matrix(anime_tfidf_matrix)
+anime_tfidf_matrix = anime_tfidf.fit_transform(df_anime['genres'].values.astype('U')).astype(np.float32)
+anime_tfidf_matrix_dense = anime_tfidf_matrix.toarray()
+anime_tfidf_matrix_dense = anime_tfidf_matrix_dense / np.linalg.norm(anime_tfidf_matrix_dense, axis=1, keepdims=True)
+anime_index = faiss.IndexFlatIP(anime_tfidf_matrix_dense.shape[1])
+anime_index.add(anime_tfidf_matrix_dense)
 
 # Content-based movie recommendations
 movie_tfidf = TfidfVectorizer(stop_words='english')
@@ -61,11 +64,14 @@ def get_content_based_anime_recommendations(request: ContentRequest):
     mediaId = request.mediaId
     n = request.number
     idx = df_anime[df_anime['id'] == mediaId].index[0]
-    sim_scores = compute_cosine_similarity_for_anime(anime_tfidf_matrix_sparse, idx)
-    valid_scores = [(i, score) for i, score in enumerate(sim_scores) if df_anime.iloc[i]['score'] != -1]
-    sorted_scores = sorted(valid_scores, key=lambda x: (x[1], df_anime.iloc[x[0]]['score']), reverse=True)
-    top_animes = [x for x in sorted_scores if x[0] != idx][:n]
-    recommended_indices = [x[0] for x in top_animes]
+    anime_vector = anime_tfidf_matrix_dense[idx].reshape(1, -1).astype(np.float32)
+    distances, indices = anime_index.search(anime_vector, n+1)
+    indices = indices[0]
+    distances = distances[0]
+    filtered_indices = [(i, d) for i, d in zip(indices, distances) if i != idx]
+    filtered_indices = sorted(filtered_indices, key=lambda x: (x[1], df_anime.iloc[x[0]]['score']), reverse=True)
+    top_indices = [i for i, _ in filtered_indices[:n]]
+    recommended_indices = [i for i in top_indices if df_anime.iloc[i]['score'] != -1]
     recommendations = df_anime.iloc[recommended_indices][['id', 'title', 'genres', 'score', 'image_url']]
     return recommendations.to_dict(orient='records')
 
