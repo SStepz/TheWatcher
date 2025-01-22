@@ -6,7 +6,7 @@ from joblib import dump
 
 # TV Data
 df_tv = pd.read_csv('../WatcherAPI/app/Dataset/TV/tv.csv')
-df_tv = df_tv.drop(columns=['original_language', 'overview', 'adult', 'backdrop_path', 'first_air_date', 'last_air_date', 'homepage', 'original_name', 'poster_path', 'status', 'tagline', 'created_by', 'languages', 'networks', 'origin_country', 'spoken_languages', 'production_companies', 'production_countries', 'episode_run_time'])
+df_tv = df_tv.drop(columns=['original_language', 'overview', 'adult', 'backdrop_path', 'first_air_date', 'last_air_date', 'homepage', 'original_name', 'poster_path', 'status', 'tagline', 'created_by', 'languages', 'networks', 'origin_country', 'spoken_languages', 'production_countries', 'episode_run_time'])
 df_tv_score = pd.read_csv('../WatcherAPI/app/Dataset/TV/tv_user_ratings.csv')
 df_tv_score['userId'] = df_tv_score['userId'].astype('str')
 

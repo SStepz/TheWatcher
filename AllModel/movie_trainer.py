@@ -6,7 +6,7 @@ from joblib import dump
 
 # Movie Data
 df_movie = pd.read_csv('../WatcherAPI/app/Dataset/Movie/movie.csv')
-df_movie = df_movie.drop(columns=['status', 'release_date', 'revenue', 'runtime', 'adult', 'backdrop_path', 'budget', 'homepage', 'imdb_id', 'original_language', 'original_title', 'overview', 'poster_path', 'tagline', 'production_companies', 'production_countries', 'spoken_languages'])
+df_movie = df_movie.drop(columns=['status', 'release_date', 'revenue', 'runtime', 'adult', 'backdrop_path', 'budget', 'homepage', 'imdb_id', 'original_language', 'original_title', 'overview', 'poster_path', 'tagline', 'production_countries', 'spoken_languages'])
 df_movie_score = pd.read_excel('../WatcherAPI/app/Dataset/Movie/movie_user_ratings.xlsx')
 df_movie_score['userId'] = df_movie_score['userId'].astype('str')
 

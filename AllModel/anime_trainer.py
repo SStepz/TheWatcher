@@ -6,6 +6,7 @@ from joblib import dump
 
 # Anime Data
 df_anime = pd.read_csv('../WatcherAPI/app/Dataset/Anime/anime.csv')
+df_anime = df_anime.drop(columns=['synopsis', 'episodes', 'status', 'producers', 'licensors', 'source', 'duration', 'favorites', 'scored_by', 'members', 'is_hentai'])
 df_anime_score = pd.read_excel('../WatcherAPI/app/Dataset/Anime/anime_user_ratings.xlsx')
 df_anime_score['user_id'] = df_anime_score['user_id'].astype('str')
 
@@ -16,7 +17,7 @@ df_anime['score'] = df_anime['score'].replace(-1, score_mean)
 df_anime['score'] = df_anime['score'].astype('float64')
 df_anime['rank'] = df_anime['rank'].replace(-1, np.nan)
 df_anime['rank'] = df_anime['rank'].astype('float64')
-df_anime_score = df_anime_score[df_anime_score['username'].notnull()]
+df_anime_score = df_anime_score[df_anime_score['user_id'].notnull()]
 
 # Model Training
 reader = Reader(rating_scale=(df_anime_score['rating'].min(), df_anime_score['rating'].max()))
