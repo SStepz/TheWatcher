@@ -15,6 +15,8 @@ df_anime_score = pd.read_excel('./app/Dataset/Anime/anime_user_ratings.xlsx')
 df_anime_score['user_id'] = df_anime_score['user_id'].astype('str')
 anime_svd_model = load('./app/Model/anime_svd_model.joblib')
 
+df_anime['content'] = df_anime['genres'].apply(lambda x: ' '.join([x] * 3)) + ' ' + df_anime['studios']
+
 anime_scores = df_anime['score'][df_anime['score'] != -1]
 anime_scores = anime_scores.astype('float32')
 score_mean = round(anime_scores.mean() , 2)
@@ -49,6 +51,9 @@ df_tv = pd.read_csv('./app/Dataset/TV/tv.csv', usecols=['id', 'name', 'vote_coun
 df_tv_score = pd.read_csv('./app/Dataset/TV/tv_user_ratings.csv')
 df_tv_score['userId'] = df_tv_score['userId'].astype('str')
 tv_svd_model = load('./app/Model/tv_svd_model.joblib')
+
+# df_tv['genres'] = df_tv['genres'].fillna('')
+# df_tv['content'] = df_tv['genres'].apply(lambda x: ' '.join([x] * 3)) + ' ' + df_tv['production_companies']
 
 df_tv = df_tv[df_tv['vote_average'] != 0]
 df_tv['vote_count'] = df_tv['vote_count'].astype('int32')

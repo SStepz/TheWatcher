@@ -13,7 +13,7 @@ from app.tv_functions import *
 
 # Content-based anime recommendations
 anime_tfidf = TfidfVectorizer(stop_words='english')
-anime_tfidf_matrix = anime_tfidf.fit_transform(df_anime['genres'].values.astype('U')).astype(np.float32)
+anime_tfidf_matrix = anime_tfidf.fit_transform(df_anime['content'].values.astype('U')).astype(np.float32)
 anime_tfidf_matrix_dense = anime_tfidf_matrix.toarray()
 epsilon = 1e-10
 anime_tfidf_matrix_dense = anime_tfidf_matrix_dense / (np.linalg.norm(anime_tfidf_matrix_dense, axis=1, keepdims=True) + epsilon)
@@ -24,7 +24,8 @@ anime_index.add(anime_tfidf_matrix_dense)
 movie_tfidf = TfidfVectorizer(stop_words='english')
 movie_tfidf_matrix = movie_tfidf.fit_transform(df_movie['genres'].values.astype('U')).astype(np.float32)
 movie_tfidf_matrix_dense = movie_tfidf_matrix.toarray()
-movie_tfidf_matrix_dense = movie_tfidf_matrix_dense / np.linalg.norm(movie_tfidf_matrix_dense, axis=1, keepdims=True)
+epsilon = 1e-10
+movie_tfidf_matrix_dense = movie_tfidf_matrix_dense / (np.linalg.norm(movie_tfidf_matrix_dense, axis=1, keepdims=True) + epsilon)
 movie_index = faiss.IndexFlatIP(movie_tfidf_matrix_dense.shape[1])
 movie_index.add(movie_tfidf_matrix_dense)
 
@@ -32,7 +33,8 @@ movie_index.add(movie_tfidf_matrix_dense)
 tv_tfidf = TfidfVectorizer(stop_words='english')
 tv_tfidf_matrix = tv_tfidf.fit_transform(df_tv['genres'].values.astype('U')).astype(np.float32)
 tv_tfidf_matrix_dense = tv_tfidf_matrix.toarray()
-tv_tfidf_matrix_dense = tv_tfidf_matrix_dense / np.linalg.norm(tv_tfidf_matrix_dense, axis=1, keepdims=True)
+epsilon = 1e-10
+tv_tfidf_matrix_dense = tv_tfidf_matrix_dense / (np.linalg.norm(tv_tfidf_matrix_dense, axis=1, keepdims=True) + epsilon)
 tv_index = faiss.IndexFlatIP(tv_tfidf_matrix_dense.shape[1])
 tv_index.add(tv_tfidf_matrix_dense)
 
@@ -75,6 +77,7 @@ def get_content_based_anime_recommendations(request: ContentRequest):
     top_indices = [i for i, _ in filtered_indices[:n]]
     recommended_indices = [i for i in top_indices if df_anime.iloc[i]['score'] != -1]
     recommendations = df_anime.iloc[recommended_indices][['id', 'title', 'genres', 'score', 'image_url']]
+    recommendations = recommendations.replace([np.inf, -np.inf], np.nan).fillna(0.0)
     return recommendations.to_dict(orient='records')
 
 @app.post("/anime/recommendations/user", tags=['Anime'])
@@ -110,6 +113,7 @@ def get_content_based_movie_recommendations(request: ContentRequest):
     top_indices = [i for i, _ in filtered_indices[:n]]
     recommended_indices = [i for i in top_indices if df_movie.iloc[i]['vote_average'] != -1]
     recommendations = df_movie.iloc[recommended_indices][['id', 'title', 'genres', 'vote_average', 'release_date', 'poster_path']]
+    recommendations = recommendations.replace([np.inf, -np.inf], np.nan).fillna(0.0)
     return recommendations.to_dict(orient='records')
 
 @app.post("/movie/recommendations/user", tags=['Movie'])
@@ -145,6 +149,7 @@ def get_content_based_tv_recommendations(request: ContentRequest):
     top_indices = [i for i, _ in filtered_indices[:n]]
     recommended_indices = [i for i in top_indices if df_tv.iloc[i]['vote_average'] != -1]
     recommendations = df_tv.iloc[recommended_indices][['id', 'name', 'genres', 'vote_average', 'first_air_date', 'poster_path']]
+    recommendations = recommendations.replace([np.inf, -np.inf], np.nan).fillna(0.0)
     return recommendations.to_dict(orient='records')
 
 @app.post("/tv/recommendations/user", tags=['TV Series'])
