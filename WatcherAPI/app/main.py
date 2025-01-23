@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import numpy as np
+import gc
 from sklearn.feature_extraction.text import TfidfVectorizer
 from app.data import df_anime, df_anime_score, anime_svd_model, df_movie, df_movie_score, movie_svd_model, df_tv, df_tv_score, tv_svd_model
 import faiss
@@ -14,7 +15,8 @@ from app.tv_functions import *
 anime_tfidf = TfidfVectorizer(stop_words='english')
 anime_tfidf_matrix = anime_tfidf.fit_transform(df_anime['genres'].values.astype('U')).astype(np.float32)
 anime_tfidf_matrix_dense = anime_tfidf_matrix.toarray()
-anime_tfidf_matrix_dense = anime_tfidf_matrix_dense / np.linalg.norm(anime_tfidf_matrix_dense, axis=1, keepdims=True)
+epsilon = 1e-10
+anime_tfidf_matrix_dense = anime_tfidf_matrix_dense / (np.linalg.norm(anime_tfidf_matrix_dense, axis=1, keepdims=True) + epsilon)
 anime_index = faiss.IndexFlatIP(anime_tfidf_matrix_dense.shape[1])
 anime_index.add(anime_tfidf_matrix_dense)
 
@@ -81,9 +83,17 @@ def get_hybrid_user_based_anime_recommendations(request: UserRequest):
     n = request.number
     df_real_time = fetch_real_time_data('anime')
     user_anime_matrix, user_anime_sparse_matrix = get_user_item_anime_matrix(df_anime_score, df_real_time)
+
+    del df_real_time
+    gc.collect()
+
     knn = get_anime_knn_model(user_anime_sparse_matrix)
     recommended_animes_ids = hybrid_anime_recommendations(user_id, anime_svd_model, knn, user_anime_matrix, user_anime_sparse_matrix, n)
     recommendations = get_anime_details_by_ids(recommended_animes_ids)
+
+    del user_anime_matrix, user_anime_sparse_matrix, knn, recommended_animes_ids
+    gc.collect()
+
     return recommendations.to_dict(orient='records')
 
 @app.post("/movie/recommendations/content", tags=['Movie'])
@@ -108,9 +118,17 @@ def get_hybrid_user_based_movie_recommendations(request: UserRequest):
     n = request.number
     df_real_time = fetch_real_time_data('movie')
     user_movie_matrix, user_movie_sparse_matrix = get_user_item_movie_matrix(df_movie_score, df_real_time)
+
+    del df_real_time
+    gc.collect()
+
     knn = get_movie_knn_model(user_movie_sparse_matrix)
     recommended_movies_ids = hybrid_movie_recommendations(user_id, movie_svd_model, knn, user_movie_matrix, user_movie_sparse_matrix, n)
     recommendations = get_movie_details_by_ids(recommended_movies_ids)
+
+    del user_movie_matrix, user_movie_sparse_matrix, knn, recommended_movies_ids
+    gc.collect()
+
     return recommendations.to_dict(orient='records')
 
 @app.post("/tv/recommendations/content", tags=['TV Series'])
@@ -135,7 +153,15 @@ def get_hybrid_user_based_tv_recommendations(request: UserRequest):
     n = request.number
     df_real_time = fetch_real_time_data('tv')
     user_tv_matrix, user_tv_sparse_matrix = get_user_item_tv_matrix(df_tv_score, df_real_time)
+
+    del df_real_time
+    gc.collect()
+
     knn = get_tv_knn_model(user_tv_sparse_matrix)
     recommended_tvs_ids = hybrid_tv_recommendations(user_id, tv_svd_model, knn, user_tv_matrix, user_tv_sparse_matrix, n)
     recommendations = get_tv_details_by_ids(recommended_tvs_ids)
+
+    del user_tv_matrix, user_tv_sparse_matrix, knn, recommended_tvs_ids
+    gc.collect()
+
     return recommendations.to_dict(orient='records')

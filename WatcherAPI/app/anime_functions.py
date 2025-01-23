@@ -1,4 +1,5 @@
 import pandas as pd
+import gc
 from scipy.sparse import csr_matrix
 from sklearn.neighbors import NearestNeighbors
 from app.data import df_anime
@@ -11,6 +12,9 @@ def get_user_item_anime_matrix(df_anime_score, df_real_time):
     user_anime_matrix = df_combined.pivot(index='user_id', columns='anime_id', values='rating').fillna(0)
     user_click_matrix = df_combined.pivot(index='user_id', columns='anime_id', values='clickCount').fillna(0)
     user_favorite_matrix = df_combined.pivot(index='user_id', columns='anime_id', values='favoriteAt').fillna(0)
+
+    del df_combined
+    gc.collect()
 
     # Combine matrices
     user_anime_matrix = user_anime_matrix + user_click_matrix * 0.1 + user_favorite_matrix * 0.5
