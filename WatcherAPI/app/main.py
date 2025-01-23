@@ -78,6 +78,7 @@ def get_content_based_anime_recommendations(request: ContentRequest):
     recommended_indices = [i for i in top_indices if df_anime.iloc[i]['score'] != -1]
     recommendations = df_anime.iloc[recommended_indices][['id', 'title', 'genres', 'score', 'image_url']]
     recommendations = recommendations.replace([np.inf, -np.inf], np.nan).fillna(0.0)
+    recommendations = recommendations.infer_objects(copy=False)
     return recommendations.to_dict(orient='records')
 
 @app.post("/anime/recommendations/user", tags=['Anime'])
@@ -114,6 +115,7 @@ def get_content_based_movie_recommendations(request: ContentRequest):
     recommended_indices = [i for i in top_indices if df_movie.iloc[i]['vote_average'] != -1]
     recommendations = df_movie.iloc[recommended_indices][['id', 'title', 'genres', 'vote_average', 'release_date', 'poster_path']]
     recommendations = recommendations.replace([np.inf, -np.inf], np.nan).fillna(0.0)
+    recommendations = recommendations.infer_objects(copy=False)
     return recommendations.to_dict(orient='records')
 
 @app.post("/movie/recommendations/user", tags=['Movie'])
@@ -150,6 +152,7 @@ def get_content_based_tv_recommendations(request: ContentRequest):
     recommended_indices = [i for i in top_indices if df_tv.iloc[i]['vote_average'] != -1]
     recommendations = df_tv.iloc[recommended_indices][['id', 'name', 'genres', 'vote_average', 'first_air_date', 'poster_path']]
     recommendations = recommendations.replace([np.inf, -np.inf], np.nan).fillna(0.0)
+    recommendations = recommendations.infer_objects(copy=False)
     return recommendations.to_dict(orient='records')
 
 @app.post("/tv/recommendations/user", tags=['TV Series'])
